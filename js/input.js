@@ -149,7 +149,8 @@ function onDragStart(e) {
     const el_box = renderer.domElement.getBoundingClientRect();
     mouse.x = (e.clientX - el_box.left) / width;
     mouse.y = 1.0 - (e.clientY - el_box.top) / height;
-    
+    prev_mouse.x = mouse.x;
+    prev_mouse.y = mouse.y;
 }
 
 function onDragging(e) {
