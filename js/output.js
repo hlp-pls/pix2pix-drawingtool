@@ -6,7 +6,7 @@ console.log(tf);
 alert('Model loading! Please wait.');
 
 var outputCanvas, outputCtx;
-const edges2cat = pix2pix('./models/edges2cats_AtoB.pict', modelLoaded);
+const edges2cat = pix2pix('./../models/edges2cats_AtoB.pict', modelLoaded);
 var fromto_count = 0;
 
 function modelLoaded() {
