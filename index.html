@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="./css/style.css">
+		<script src="./js/libs/tf.js"></script>
+	</head>
+
+	<body>
+		<div id="canvas_container">
+			<div id="three_container"></div>
+			<div id="three_interpolation"></div>
+			<div id="message">&rarr; CLICK TRANSFER &rarr;</div>
+		</div>
+
+		<div class="button_container">
+			<button id="random" style="display: none;">RANDOM</button>
+			<button id="pencil">PENCIL</button>
+			<button id="eraser">ERASER</button>
+			<button id="smudge">SMUDGE</button>
+			<button id="transfer">TRANSFER</button>
+			<button id="interpolation">INTERPOLATE</button>
+			<button id="play">PLAY</button>
+			<button id="undo" style="display: none;">UNDO</button>
+			<button id="clear" style="display: none;">CLEAR</button>
+			<div id="fromto_img_container">
+				<figure>
+					<img id="from_img">
+					<figcaption>Fig.1 - Interpolation origin.</figcaption>
+				</figure>
+				<figure>
+					<img id="to_img">
+					<figcaption>Fig.2 - Interpolation destination.</figcaption>
+				</figure>
+			</div>
+		</div>
+		
+		<!--append previous inputs / generations-->
+		<div id="img_container"></div>
+
+		<script type="module" src="./js/input.js"></script>
+
+		<script src="./js/pix2pix.js"></script>
+		<script src="./js/output.js"></script>
+
+		<script type="module" src="./js/interpolation.js"></script>
+	</body>
+</html>
