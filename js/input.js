@@ -3,16 +3,19 @@
 import * as THREE from './libs/three.module.js';
 import { renderer_sh_vert, renderer_sh_frag } from './../shader/renderer_sh.js';
 import { addAndFade_sh_vert, addAndFade_sh_frag } from './../shader/addAndFade_sh.js';
+import { copier_sh_vert, copier_sh_frag } from './../shader/copier_sh.js';
+
 
 let renderer, camera, scene;
 let quad;
+let texture_loader;
 
 let pixel_density = 4;
 
 let pingpongbuffer = [],
     pingpongbuffer_scene, pingpongbuffer_camera;
 
-let pingpongbuffer_shader_material, renderer_shader_material;
+let pingpongbuffer_shader_material, renderer_shader_material, copier_shader_material;
 
 let time = 0;
 let width = 256,
@@ -26,6 +29,8 @@ let is_mousedown = 0.0;
 let brush_size = 0.001;
 let tar_brush_size = 0.0025;
 let is_pencil = 1.0;
+
+let ind_0 = 0, ind_1 = 0;
 
 init();
 
@@ -61,6 +66,14 @@ function init() {
         }
     });
 
+    copier_shader_material = new THREE.ShaderMaterial({
+        vertexShader: copier_sh_vert,
+        fragmentShader: copier_sh_frag,
+        uniforms: {
+            buffer: { value: null }
+        }
+    });
+
     pingpongbuffer_shader_material = new THREE.ShaderMaterial({
         vertexShader: addAndFade_sh_vert,
         fragmentShader: addAndFade_sh_frag,
@@ -86,16 +99,11 @@ function init() {
 
     scene = new THREE.Scene();
     camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    pingpongbuffer_scene = new THREE.Scene();
-    pingpongbuffer_camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
     const quad_geometry = new THREE.PlaneBufferGeometry(2, 2, 1, 1);
 
     quad = new THREE.Mesh(quad_geometry, renderer_shader_material);
     scene.add(quad);
-
-    quad = new THREE.Mesh(quad_geometry, pingpongbuffer_shader_material);
-    pingpongbuffer_scene.add(quad);
 
     animate();
 
@@ -109,7 +117,25 @@ function init() {
     document.getElementById('smudge').addEventListener('click', Smudge);
 
     document.getElementById('pencil').classList.add('active');
+
+    texture_loader = new THREE.TextureLoader();
 }
+
+window.get_clicked_Sketch = function(_el){
+    console.log(_el.getAttribute('sketch_data'));
+    texture_loader.load(_el.getAttribute('sketch_data'), function(txtr){
+        console.log(txtr);
+        quad.material = copier_shader_material;
+
+        copier_shader_material.uniforms.buffer.value = txtr;
+
+        renderer.setRenderTarget(pingpongbuffer[ind_1]);
+        renderer.render(scene, camera);
+
+        renderer.setRenderTarget(null);
+        renderer.render(scene, camera);
+    });
+};
 
 function Smudge(){
     if(is_pencil != 2.0){
@@ -201,8 +227,10 @@ function update() {
 }
 
 function render() {
-    let ind_0 = time % 2;
-    let ind_1 = (ind_0 == 0) ? 1 : 0;
+    ind_0 = time % 2;
+    ind_1 = (ind_0 == 0) ? 1 : 0;
+
+    quad.material = pingpongbuffer_shader_material;
 
     pingpongbuffer_shader_material.uniforms.buffer.value = pingpongbuffer[ind_0].texture;
     pingpongbuffer_shader_material.uniforms.time.value = time;
@@ -218,7 +246,9 @@ function render() {
     pingpongbuffer_shader_material.uniforms.brush_size.value = brush_size;
 
     renderer.setRenderTarget(pingpongbuffer[ind_1]);
-    renderer.render(pingpongbuffer_scene, pingpongbuffer_camera);
+    renderer.render(scene, camera);
+
+    quad.material = renderer_shader_material;
 
     renderer_shader_material.uniforms.buffer.value = pingpongbuffer[ind_0].texture;
     renderer_shader_material.uniforms.time.value = time;

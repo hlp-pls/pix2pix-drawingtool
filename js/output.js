@@ -43,27 +43,47 @@ async function transfer() {
     //--> resizing gets rid of tfjs error
 
     //--> resizing canvas size makes the input image tainted, and thus leads to incorrect outputs
-    
+    //
+
+    let result_dom;
+
     //console.log(input_canvas);
     // Apply pix2pix transformation
     await edges2cat.transfer(input_canvas, result => {
     	console.log("transfer check");
 
         //document.getElementById('message').innerHTML = "TRANSFER COMPLETE";
+        result_dom = result;
+        
+        //console.log(result);
+        clearCanvas();
+        
+        result.onload = function(){
+            outputCtx.drawImage(result, 0, 0, 512, 512);
+        };
+    });
 
-        document.getElementById('img_container').appendChild(result);
-        result.addEventListener('click', function(){
-            result.style.borderRadius = '15px';
-            result.classList.add('clicked_img');
-            result.classList.add('generated_imgs');
+    //input_canvas.width = 512;
+    //input_canvas.height = 512;
+    {   
+        const input_url = input_canvas.toDataURL(1, 'image/png');
+        result_dom.setAttribute('sketch_data', input_url);
+        document.getElementById('img_container').appendChild(result_dom);
+        result_dom.addEventListener('click', function(){
+            
+            get_clicked_Sketch(this);
+
+            result_dom.style.borderRadius = '15px';
+            result_dom.classList.add('clicked_img');
+            result_dom.classList.add('generated_imgs');
             let fromto_imgs = document.getElementById('fromto_img_container').getElementsByTagName('img');
 
             if(fromto_count == 0){
-                fromto_imgs[0].src = result.src;
+                fromto_imgs[0].src = result_dom.src;
             }else if(fromto_count == 1){
-                fromto_imgs[1].src = result.src;
+                fromto_imgs[1].src = result_dom.src;
             }else if(fromto_count == 2){
-                fromto_imgs[0].src = result.src;
+                fromto_imgs[0].src = result_dom.src;
                 fromto_count = 0;
             }
 
@@ -77,16 +97,8 @@ async function transfer() {
                 }
             }
         })
-        //console.log(result);
-        clearCanvas();
         
-        result.onload = function(){
-            outputCtx.drawImage(result, 0, 0, 512, 512);
-        };
-    });
-
-    //input_canvas.width = 512;
-    //input_canvas.height = 512;
+    }
 }
 
 function clearCanvas() {
